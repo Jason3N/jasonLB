@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
     "net/http"
-	"time"
 )
 
 func main() {
@@ -16,11 +15,6 @@ func main() {
     s1 := &http.Server{
         Addr:           ":8081",
         Handler:        myHandler,
-		// create a timeout for the server
-        ReadTimeout:    10 * time.Second,
-        WriteTimeout:   10 * time.Second,
-		// set the maximum header bytes so we don't get a 431 error
-        MaxHeaderBytes: 1 << 20,
     }
 
 	fmt.Println("backend server are up")
