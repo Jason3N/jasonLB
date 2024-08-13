@@ -10,6 +10,8 @@ import (
 	"net/url"
 )
 
+
+// create backend for loadbalancer
 type Backend struct {
 	URL *url.URL
 	ReverseProxy *http.ReverseProxy
@@ -18,6 +20,17 @@ type Backend struct {
 type LoadBalancer struct {
 	backendServers []*Backend
 	current int
+}
+
+func NewLoadBalancer() *LoadBalancer {
+	return &LoadBalancer {
+		backendServers: make([]*Backend, 0),
+		current: 0,
+	}
+}
+
+func (lb *LoadBalancer) AddBackend(backend *Backend) {
+	lb.backendServers = append(lb.backendSerers, backend)
 }
 
 type ServerManager struct {
@@ -76,5 +89,25 @@ func main (){
 		serv.StartServers()
 	}
 	fmt.Println("backend servers are up!")
+
+	backendPorts := []int{8081, 8082, 8083}
+
+	for _, port := range backendPorts {
+		url, err := url.Parse(fmt.Sprintf("http://localhost:%d", port))
+		if err != nil {
+			log.Fatal(err)
+		}
+		proxy := http.NewSingleHostReverseProxy(url)
+		backend := &Backend{
+			URL: url,
+			ReverseProxy: proxy,
+		}
+
+		loadBalancer
+	}
+
+	lb := &LoadBalancer{
+		backendServers: []*Backend{
+	}
 	select {}
 }
