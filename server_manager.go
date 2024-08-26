@@ -1,34 +1,21 @@
 package main
-// this is to demonstarte the use of multiple servers
 
 import (
-	"fmt"
-	"sync"
 	"context"
-    "net/http"
-	"time"
-	"net/url"
+	"fmt"
+	"net/http"
+	"sync"
 )
 
-type Backend struct {
-	URL *url.URL
-	ReverseProxy *http.ReverseProxy
-}
-
-type LoadBalancer struct {
-	backendServers []*Backend
-	current int
-}
-
 type ServerManager struct {
-	servers map[int]*http.Server
-	mu 	sync.Mutex
+	servers    map[int]*http.Server
+	mu         sync.Mutex
 	portNumber int
 }
 
 func NewServerManager(startPort int) *ServerManager {
-	return &ServerManager {
-		servers: make(map[int]*http.Server),
+	return &ServerManager{
+		servers:    make(map[int]*http.Server),
 		portNumber: startPort,
 	}
 }
@@ -44,13 +31,11 @@ func (serv *ServerManager) StartServers() {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "this is server ", port, " reporting for duty")
 	})
-	server := &http.Server {
-		Addr:		fmt.Sprintf(":%d", port),
-		Handler:	handler,
-		ReadTiemout: 10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: handler,
 	}
-	go func () {
+	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			fmt.Println("server failed for this reason:", err)
 		}
@@ -59,22 +44,10 @@ func (serv *ServerManager) StartServers() {
 	serv.servers[port] = server
 }
 
-func (serv ServerManager) StopServers() {
+func (serv *ServerManager) StopServers() {
 	serv.mu.Lock()
 	defer serv.mu.Unlock()
 	for _, server := range serv.servers {
 		server.Shutdown(context.Background())
 	}
-}
-
-
-
-func main (){
-	serv := NewServerManager(8081)
-	// create 3 servers
-	for i := 0; i < 3; i++ {
-		serv.StartServers()
-	}
-	fmt.Println("backend servers are up!")
-	select {}
 }
