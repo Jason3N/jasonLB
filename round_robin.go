@@ -1,7 +1,5 @@
 package main
 
-// this is to demonstarte the use of multiple servers
-
 import (
 	"fmt"
 )
